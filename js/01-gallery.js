@@ -3,44 +3,49 @@ import { galleryItems } from "./gallery-items.js";
 
 const galleryList = document.querySelector(".gallery");
 
+// Робимо розмітку
 const markup = galleryItems
   .map(
-    (item) =>
+    ({ original, preview, description }) =>
       `<div class="gallery__item">
-        <a class="gallery__link" href="${item.original}" onclick="event.preventDefault()">
+        <a class="gallery__link" href="${original}">
             <img
             class="gallery__image" 
-            src="${item.preview}" 
-            alt="${item.description}" 
-            data-src="${item.original}">
+            src="${preview}" 
+            alt="${description}" 
+            data-src="${original}">
         </a>
     </div>`
   )
   .join("");
 
-console.log(markup);
-
+// Додаємо розмітку до HTML
 galleryList.insertAdjacentHTML("beforeend", markup);
 
-const smalImg = document.querySelectorAll(".gallery__image");
+// Функція натиску на картинку та її збільшення + підміна src на data-src
+function zoomImg(evt) {
+  evt.preventDefault();
 
-galleryList.addEventListener("click", (event) => {
-  smalImg.forEach(() => {
-    if (event.target.nodeName !== "IMG") {
-        return;
+  if (evt.target.nodeName !== "IMG") {
+    return;
+  }
+
+  const modal = basicLightbox.create(`
+    <img src="${evt.target.dataset.src}" width="800" height="600">
+    `);
+
+  modal.show();
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.code === "Escape") {
+        modal.close();
       }
-    event.target.src = event.target.dataset.src;
-  });
-});
+    },
+    { once: true }
+  );
+}
 
-
-// document.querySelector('button.image').onclick = () => {
-
-// 	basicLightbox.create(`
-// 		<img width="1400" height="900" src="https://placehold.it/1400x900">
-// 	`).show()
-// }
-
-
-const open =  basicLightbox.create(`<img src="${event.target.dataset.src}" alt="" width="800" height="600">`);
-open.show();
+// Присвоювання події при кліку
+galleryList.addEventListener("click", zoomImg);
